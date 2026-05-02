@@ -233,6 +233,65 @@ For day-to-day single-task work (bug fix, feature add), the overhead is one ledg
 
 ---
 
+## Updates
+
+> **Important:** Receipts is *not* a package manager. Installs are static snapshots — **no install method auto-updates** when a new version ships. Below are the manual update commands.
+
+### Get notified when a new version ships
+
+Click **Watch → Custom → Releases** at the top of [the repo page](https://github.com/Tramsnf/Receipts) — GitHub will email you on every release.
+
+### Update commands per agent
+
+**Claude Code (git clone install)** — one-liner via the bundled update script:
+
+```bash
+# user-level
+~/.claude/skills/receipts/scripts/update.sh
+
+# project-level
+.claude/skills/receipts/scripts/update.sh
+```
+
+The script `git fetch`-es, refuses to pull on uncommitted local changes, shows what's new, and reminds you to refresh installer files in any repos that copied from it.
+
+**Cursor (`.cursorrules`):**
+
+```bash
+# from the repo where Cursor uses it
+curl -fsSL https://raw.githubusercontent.com/Tramsnf/Receipts/main/installers/cursor/.cursorrules > .cursorrules
+```
+
+**Windsurf (`.windsurfrules`):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Tramsnf/Receipts/main/installers/windsurf/.windsurfrules > .windsurfrules
+```
+
+**Cline / Roo Code (custom instructions in editor settings):**
+
+Pasted text in settings doesn't update automatically. Replace your custom-instructions / mode prompt with the latest:
+
+- Cline → <https://github.com/Tramsnf/Receipts/blob/main/installers/cline/custom-instructions.md>
+- Roo Code → <https://github.com/Tramsnf/Receipts/blob/main/installers/roo-code/system-prompt.md>
+
+**OpenHands (`.openhands/microagents/receipts.md`):**
+
+```bash
+mkdir -p .openhands/microagents
+curl -fsSL https://raw.githubusercontent.com/Tramsnf/Receipts/main/installers/openhands/microagents/receipts.md > .openhands/microagents/receipts.md
+```
+
+### Version check
+
+Every install carries a copy of [`skill.json`](skill.json) with the version it was installed at. Compare to the [latest release](https://github.com/Tramsnf/Receipts/releases/latest) to see if you're current. If you're on a git clone, `update.sh` prints both numbers.
+
+### Why no auto-update?
+
+Skills run inside agent runtimes that read static files. There's no daemon, no package manager, no central registry. The static-file model is exactly what makes Receipts portable across six different agent runtimes — every alternative would require building runtime-specific shims. Manual updates are the cost of that portability.
+
+---
+
 ## Why this matters
 
 If your codebase can't explain itself, you don't have a system — you have a liability.

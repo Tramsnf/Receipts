@@ -6,6 +6,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ---
 
+## [0.3.1] — 2026-05-02
+
+### Added
+
+- **`scripts/update.sh`** — one-liner update for Claude Code git-clone installs. Detects whether the install is a git checkout, runs `git fetch` + ff-only `git pull`, refuses on uncommitted local changes, prints diff summary, reminds about installer files copied into other repos. Falls back to clear re-clone instructions when the install is a copy or zip.
+- **Updates** section in `README.md` with per-agent update commands (Claude Code via `update.sh`; Cursor / Windsurf / OpenHands via `curl`; Cline / Roo Code via paste-and-replace links). Plus version-check guidance and an explanation of why auto-update isn't possible across six agent runtimes.
+- "Get notified when a new version ships" tip — GitHub Watch → Custom → Releases.
+
+### Changed
+
+- `scripts/README.md` table now includes `update.sh`.
+
+### Notes
+
+This is a tooling + docs release in response to a real user question: "if I installed Receipts before this update, will I get the new version automatically?" The honest answer is no — every install method is a static snapshot. This release closes that gap with a one-command update path for the most common install (Claude Code) and direct curl one-liners for the others.
+
+---
+
 ## [0.3.0] — 2026-05-02
 
 ### Added

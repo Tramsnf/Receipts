@@ -1,6 +1,6 @@
 {
   "name": "receipts",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Production observability and codebase memory for AI coding agents. Forces structured logging, error handling, change tracking, debug readiness, and audit trails on every change. Includes named recipes (bootstrap, scan-only, remediate-all, audit-flow, incident-investigation), deterministic helper scripts, and parallel multi-agent fan-out on Claude Code.",
   "entry": "SKILL.md",
   "license": "MIT",

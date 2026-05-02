@@ -9,6 +9,7 @@ Deterministic, fast helpers for the agent to run before reasoning. They speed up
 | [`redaction-lint.sh`](redaction-lint.sh) | Flag log lines that may leak secrets | bash + grep |
 | [`find-error-boundaries.sh`](find-error-boundaries.sh) | Locate try/catch and likely swallowed exceptions | bash + grep |
 | [`log-coverage.sh`](log-coverage.sh) | Per-file log-call density metric | bash + grep |
+| [`update.sh`](update.sh) | Update an installed Receipts skill (`git pull` if it's a clone, instructions otherwise) | bash |
 
 ## Usage
 
