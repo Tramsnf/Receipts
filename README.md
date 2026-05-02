@@ -140,6 +140,8 @@ Receipts/
 │   ├── redaction-lint.sh                 ← flag log lines that may leak secrets
 │   ├── find-error-boundaries.sh          ← locate try/catch + likely swallowed exceptions
 │   └── log-coverage.sh                   ← per-file log-call density metric
+├── examples/                             ← runnable demos
+│   └── quickstart-node/                  ← Express + pino + pino-roll, writes to logs/app.YYYY-MM-DD.N.log
 └── assets/
     ├── og-card.png                       ← 1280×640 social preview
     ├── og-card.svg                       ← vector source
@@ -206,6 +208,14 @@ Each recipe is a self-contained operating contract: goal, steps, parallel strate
 ---
 
 ## FAQ
+
+### Where do logs actually go? Are they saved to a file?
+
+The skill enforces log *shape*; you decide the *destination* in `docs/system/observability_spec.md` ("Log sinks & retention" section, mandatory as of v0.3.2).
+
+- **Default for local dev** (per the cookbooks): structured JSON to **stdout AND** a rotated file under `./logs/`. See [`examples/quickstart-node/`](examples/quickstart-node/) for a 70-line runnable demo — `npm install && npm start`, hit an endpoint, watch JSON appear in `logs/app.YYYY-MM-DD.N.log`.
+- **Default for prod**: stdout (12-factor) captured by your orchestrator (Docker / k8s / systemd / PM2) and shipped to your aggregator (Datadog / CloudWatch / Loki / Splunk / Elasticsearch).
+- A logger emitting JSON to stdout *with no sink decision documented* is now a Receipts protocol failure — `remediate-all` halts on it.
 
 ### Does this skill automatically scan and fix all my code the moment I install it?
 

@@ -1,0 +1,19 @@
+{
+  "name": "receipts-quickstart-node",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Receipts quickstart — see structured JSON logs flowing to both stdout and a rotated file end-to-end.",
+  "scripts": {
+    "start": "node app.js",
+    "tail": "tail -f logs/app.$(date -u +%Y-%m-%d).*.log | jq"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "pino": "^9.5.0",
+    "pino-roll": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

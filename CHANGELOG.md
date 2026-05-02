@@ -6,6 +6,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ---
 
+## [0.3.3] — 2026-05-02
+
+### Added
+
+- **`examples/quickstart-node/`** — a 70-line runnable demo. Express + pino + pino-roll. `npm install && npm start`, hit `localhost:3000/hello` or `/error` or `/slow`, then `tail -f logs/app.YYYY-MM-DD.N.log | jq` to watch structured JSON flow into a rotated file.
+  - `app.js` — entrypoint with logger, correlation middleware, three demo routes, graceful shutdown logging
+  - `package.json` — `express`, `pino`, `pino-roll`
+  - `README.md` — run instructions + sample output
+  - `.env.example`, `.gitignore`
+- **FAQ entry** in main `README.md` answering "where do logs actually go?" with pointers to the demo and to `observability_spec.md`.
+
+### Changed
+
+- `cookbooks/node-pino.md` §9 — added `dateFormat: 'yyyy-MM-dd'` to the pino-roll config so files are named `app.YYYY-MM-DD.N.log` instead of just `app.N.log` (clearer at-a-glance, matches what the demo writes).
+- Main `README.md` directory tree now lists `examples/`.
+
+### Notes
+
+This release was prompted by a real user question: *"the logs are not stored in a file right now?"* — correct, because the skill is templates + cookbooks, not a running app. v0.3.3 adds a runnable proof-of-life so anyone can see end-to-end log persistence working in 30 seconds. Verified locally — the demo writes 11+ structured JSON lines to `logs/app.2026-05-02.1.log` for a basic exercise.
+
+---
+
 ## [0.3.2] — 2026-05-02
 
 ### Added

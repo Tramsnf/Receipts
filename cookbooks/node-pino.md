@@ -322,10 +322,11 @@ const transport = pino.transport({
           options: {
             file: 'logs/app',
             frequency: 'daily',
+            dateFormat: 'yyyy-MM-dd',  // produces logs/app.2026-05-02.1.log
             size: '50m',
             mkdir: true,
             extension: '.log',
-            limit: { count: 14 },  // keep 14 days
+            limit: { count: 14 },  // keep 14 rotations
           },
         }]
       : []),
@@ -335,7 +336,7 @@ const transport = pino.transport({
 export const logger = pino({ /* base config from §1 */ }, transport);
 ```
 
-Add `logs/` to `.gitignore`. View tail with `tail -f logs/app-$(date +%Y-%m-%d).log | jq`.
+Add `logs/` to `.gitignore`. View tail with `tail -f logs/app.$(date -u +%Y-%m-%d).*.log | jq`.
 
 ### Production: stdout + ship to aggregator
 
