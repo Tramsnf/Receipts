@@ -1,0 +1,26 @@
+{
+  "name": "receipts",
+  "version": "0.1.0",
+  "description": "Production observability and codebase memory for AI coding agents. Forces structured logging, error handling, change tracking, debug readiness, and audit trails on every change.",
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "author": "Smart Idima",
+  "homepage": "https://github.com/Tramsnf/Receipts",
+  "agents": [
+    "claude-code",
+    "cursor",
+    "cline",
+    "windsurf",
+    "roo-code",
+    "openhands"
+  ],
+  "tags": [
+    "observability",
+    "logging",
+    "debugging",
+    "audit-trail",
+    "production-readiness",
+    "codebase-memory",
+    "anti-vibe-coding"
+  ]
+}
