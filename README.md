@@ -128,6 +128,18 @@ Receipts/
 │   ├── node-pino.md                      ← logger + correlation + errors + dep wrapper
 │   ├── python-structlog.md               ← FastAPI + Celery patterns
 │   └── go-slog.md                        ← context-based correlation + generics
+├── recipes/                              ← named multi-step workflows
+│   ├── bootstrap.md                      ← first-touch repo setup
+│   ├── scan-only.md                      ← read-only observability assessment
+│   ├── remediate-all.md                  ← bulk upgrade everything below fully observable
+│   ├── audit-flow.md                     ← deep audit of one user-facing flow
+│   └── incident-investigation.md         ← bug → root cause → fix → prevention
+├── scripts/                              ← deterministic helpers
+│   ├── bootstrap.sh                      ← scaffold docs/system/ from templates
+│   ├── scan-observability.py             ← heuristic per-file classifier (md or json)
+│   ├── redaction-lint.sh                 ← flag log lines that may leak secrets
+│   ├── find-error-boundaries.sh          ← locate try/catch + likely swallowed exceptions
+│   └── log-coverage.sh                   ← per-file log-call density metric
 └── assets/
     ├── og-card.png                       ← 1280×640 social preview
     ├── og-card.svg                       ← vector source
@@ -154,6 +166,70 @@ Receipts/
 5. Every flow mapped in `debug_map.md`
 
 You can open the repo at any time and answer: **what changed, why, where to debug, how to reproduce, how to verify, what's still risky.**
+
+---
+
+## Parallel mode
+
+Real multi-agent parallel orchestration on Claude Code; gracefully degrades on single-agent runtimes.
+
+| Capability | Claude Code | Cursor | Cline | Windsurf | Roo Code | OpenHands |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Receipts rules enforced on every change | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Recipes (`bootstrap`, `scan-only`, `remediate-all`, …) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Helper scripts (Python + bash) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **True parallel multi-agent fan-out** (subagents) | ✅ | — | — | — | — | — |
+| Within-response tool batching | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Background script execution | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Auto-bootstrap on first encounter | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**On Claude Code**, `remediate-all` and `audit-flow` fan out across `Explore` (read-only scan) + `general-purpose` (implementation, verification) subagents. Phase-level progress streams to the user as batches complete. Concurrency safety: file ownership partitioned before spawn, ledger writes serialized through the main agent, halt-on-regression.
+
+**Everywhere else**, the same recipes run with maximum within-response parallelism — batched tool calls, background bash for the helper scripts, sequential batch processing with checkpoints. Slower wall time, identical output.
+
+---
+
+## Recipes
+
+Named workflows the user (or agent) can invoke by name:
+
+| Recipe | One-line summary |
+|---|---|
+| [`recipes/bootstrap.md`](recipes/bootstrap.md) | Scaffold `docs/system/` and run a heuristic baseline scan. Auto-runs on first invocation. |
+| [`recipes/scan-only.md`](recipes/scan-only.md) | Read-only observability assessment. No code modified. |
+| [`recipes/remediate-all.md`](recipes/remediate-all.md) | Bulk upgrade every file below `fully observable`. Parallel on Claude Code. |
+| [`recipes/audit-flow.md`](recipes/audit-flow.md) | Deep audit of one user-facing flow. Builds the `debug_map.md` entry. |
+| [`recipes/incident-investigation.md`](recipes/incident-investigation.md) | Bug → root cause → fix → prevention. Closes the loop in `incidents.md`. |
+
+Each recipe is a self-contained operating contract: goal, steps, parallel strategy, output, definition of done. The agent loads the recipe and follows it.
+
+---
+
+## FAQ
+
+### Does this skill automatically scan and fix all my code the moment I install it?
+
+**No.** A skill is a prompt — it changes how the agent behaves on tasks you give it. It doesn't run on its own.
+
+What actually happens:
+
+- **Install:** nothing. No code touched.
+- **First task in a repo:** agent auto-runs the `bootstrap` recipe — scaffolds `docs/system/`, runs the heuristic scan, fills in `system_inventory.md` and `file_index.md`. **Read-mostly**, no production code changed.
+- **Every subsequent task:** any code the agent writes or modifies conforms to the rules — structured logs, error boundaries, ledger entry, etc.
+- **To bulk-upgrade existing code:** ask explicitly — *"run the remediate-all recipe"*. The agent then fans out (on Claude Code) or walks serially (elsewhere), upgrading files batch by batch.
+- **Bug fixes:** the agent records each fix as a full incident entry — symptom, root cause, fix, prevention — in `docs/system/incidents.md`. It doesn't auto-discover bugs unless you ask it to investigate.
+
+### Will it find bugs I don't know about?
+
+The skill enforces discipline that surfaces bugs that *would otherwise be silent* — empty catches, missing error boundaries, swallowed exceptions, secret leaks. The `scan-only` recipe + helper scripts produce a prioritized list. The agent investigates each one if you run `remediate-all`.
+
+It does **not** find logic bugs that look like working code. Those still need humans + tests.
+
+### Does it cost more tokens?
+
+Yes. Parallel multi-agent fan-out runs N agents concurrently — N× the tokens of a single-agent task in that phase. Default cap: 6 concurrent. Override per recipe if needed. The scripts are zero-cost (deterministic bash/Python).
+
+For day-to-day single-task work (bug fix, feature add), the overhead is one ledger entry + a slightly more disciplined log addition. Marginal.
 
 ---
 

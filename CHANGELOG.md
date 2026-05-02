@@ -6,6 +6,40 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ---
 
+## [0.3.0] — 2026-05-02
+
+### Added
+
+- **Recipes** (`recipes/`) — named multi-step workflows with explicit parallel strategies:
+  - `recipes/bootstrap.md` — first-touch repo setup; auto-runs when `docs/system/` is missing
+  - `recipes/scan-only.md` — read-only observability assessment (no code changes)
+  - `recipes/remediate-all.md` — bulk upgrade everything below `fully observable`, with parallel multi-agent fan-out on Claude Code
+  - `recipes/audit-flow.md` — deep audit of one user-facing flow; builds the `debug_map.md` entry
+  - `recipes/incident-investigation.md` — bug → root cause → fix → prevention loop
+- **Helper scripts** (`scripts/`) — deterministic, fast helpers the agent runs before reasoning:
+  - `scripts/bootstrap.sh` — scaffolds `docs/system/` from templates
+  - `scripts/scan-observability.py` — heuristic per-file classifier with markdown or JSON output
+  - `scripts/redaction-lint.sh` — flags log lines that may leak secrets
+  - `scripts/find-error-boundaries.sh` — locates try/catch and likely swallowed exceptions
+  - `scripts/log-coverage.sh` — per-file log-call density metric
+- **Parallel orchestration directives** in `SKILL.md` — Claude Code multi-agent fan-out plan (Explore → synthesize → general-purpose impl → general-purpose verify → merge) with concurrency-safety rules.
+- **Single-agent fallback directives** for Cursor / Cline / Windsurf / Roo Code / OpenHands — within-response parallelism, background scripts, batch checkpoints.
+- **Auto-bootstrap directive** — agent runs the bootstrap recipe automatically on first encounter with a repo that has no `docs/system/`.
+- **Capability matrix** in `README.md` — what works on each agent runtime.
+- **FAQ section** in `README.md` — addresses "does this auto-fix existing code?", bug discovery limits, token cost.
+
+### Changed
+
+- `SKILL.md` now references recipes and scripts; describes parallel and single-agent execution modes explicitly.
+- `README.md` directory tree includes `recipes/` and `scripts/`.
+- `README.md` install section unchanged — recipes work transparently on every supported agent.
+
+### Notes
+
+Auto-bootstrap is read-mostly (only writes templates and one ledger entry). It's a prerequisite for all other recipes, so the skill runs it without asking permission. Override by passing `--no-bootstrap` to any recipe, or by pre-creating `docs/system/`.
+
+---
+
 ## [0.2.1] — 2026-05-02
 
 ### Added

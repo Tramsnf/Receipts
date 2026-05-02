@@ -69,6 +69,97 @@ Maintain these in the target repo. Templates live in `templates/docs/system/` �
 
 ---
 
+## Recipes
+
+Named workflows live in `recipes/`. Invoke by name when the user asks for a multi-step operation:
+
+| Recipe | When |
+|---|---|
+| [`recipes/bootstrap.md`](recipes/bootstrap.md) | first-time setup in a repo (auto-runs if `docs/system/` is missing) |
+| [`recipes/scan-only.md`](recipes/scan-only.md) | read-only observability assessment, no code changes |
+| [`recipes/remediate-all.md`](recipes/remediate-all.md) | bulk upgrade everything below `fully observable` |
+| [`recipes/audit-flow.md`](recipes/audit-flow.md) | deep audit of one user-facing flow |
+| [`recipes/incident-investigation.md`](recipes/incident-investigation.md) | bug → root cause → fix → prevention |
+
+When the user invokes a recipe (e.g. *"run the remediate-all recipe"* or *"audit the charge flow"*), load the recipe file and follow its steps verbatim.
+
+---
+
+## Helper scripts
+
+Deterministic helpers in `scripts/`. Use them as fast, repeatable starting points before agent reasoning:
+
+| Script | Output | Use in |
+|---|---|---|
+| `scripts/bootstrap.sh` | scaffold `docs/system/` from templates | bootstrap recipe |
+| `scripts/scan-observability.py` | per-file heuristic classification (markdown or JSON) | scan-only, remediate-all |
+| `scripts/redaction-lint.sh` | flag log lines that may leak secrets | scan-only, remediate-all |
+| `scripts/find-error-boundaries.sh` | locate try/catch and likely swallowed exceptions | scan-only, remediate-all |
+| `scripts/log-coverage.sh` | per-file log-call density | scan-only, audit-flow |
+
+Run them via background bash. Capture outputs into `docs/system/_*.md` files for the agent to consume. **Never** treat their output as ground truth — they're heuristic signal, the agent verifies.
+
+---
+
+## Parallel orchestration (Claude Code)
+
+For tasks that span the codebase — remediation passes, audits, large refactors — fan work out across subagents using the `Agent` tool. Default fan-out:
+
+| Phase | Agent type | Concurrency | Output |
+|---|---|---|---|
+| Scan | `Explore` (read-only) | 1 per top-level dir, max 6 | classifications, gap list |
+| Synthesize | main agent | 1 | unified queue, partitioned batches |
+| Implement | `general-purpose` | 1 per batch (≤8 files), max 6 | code changes, per-agent ledger entries, tests passing |
+| Verify | `general-purpose` | 1 per impl batch | build/test/lint confirmation |
+| Merge | main agent | 1 | merged ledger, updated `file_index.md`, final report |
+
+**Stream phase-level progress to the user** — announce phase transitions, post per-batch summaries as they complete. Don't silence work until the end.
+
+### Concurrency safety
+
+- Never write the same file from two agents simultaneously — partition file ownership before spawning.
+- Subagents stage ledger entries in per-agent files; main agent merges atomically.
+- Run `git status` between phases — halt on unexpected divergence.
+- On test failures in verification, stop launching new batches; report what's done, what's pending, what was rolled back.
+
+### When to use parallel mode
+
+- Remediation passes across many files
+- Large audits (every flow, every module)
+- Cross-cutting refactors
+- Multi-file bug investigations (Phase A only — root-cause reasoning stays serial)
+
+### When NOT to use it
+
+- Small fixes (overhead > benefit under ~5 files)
+- Tasks needing one coherent narrative (root-cause analysis, design decisions)
+- Tasks with tight cross-file dependencies (partitioning gets messy)
+
+---
+
+## Single-agent parallelism (Cursor / Cline / Windsurf / Roo Code / OpenHands)
+
+Without subagent support, maximize within-response parallelism:
+
+- batch reads / greps / finds in one tool message
+- run helper scripts via background bash in parallel (they don't block each other)
+- partition the remediation queue and process batches sequentially with explicit checkpoints
+- otherwise the same lifecycle, just serialized inside one agent loop
+
+Recipes work identically — they degrade to a serial walk. Slower but functionally complete.
+
+---
+
+## Auto-bootstrap on first invocation
+
+If the user invokes the skill in a repo without `docs/system/`, run the `bootstrap` recipe automatically before doing the user's actual request. Announce both clearly:
+
+> "I notice this is a first-touch repo for Receipts. Bootstrapping `docs/system/` baseline (~30s), then continuing with your request."
+
+Do not ask permission for the bootstrap — it's read-mostly (only writes templates and one ledger entry) and a prerequisite for everything else.
+
+---
+
 ## Mandatory instrumentation policy
 
 Every meaningful execution path must log:
