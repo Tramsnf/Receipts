@@ -6,6 +6,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ---
 
+## [0.2.1] — 2026-05-02
+
+### Added
+
+- Hero image (`assets/og-card.png`) embedded at the top of `README.md` for the repo landing page.
+- `What it works with` section in `README.md` with explicit agent, language, framework, and use-case keywords for search discoverability.
+- `Topics` and `Search` keyword block at the bottom of `README.md` for SEO.
+
+### Removed
+
+- `marketing/` directory removed from the repo. Launch tweet thread, Show HN draft, Reddit drafts, and the launch checklist are personal/local-only by design — they live outside the published package.
+
+### Changed
+
+- `README.md` directory tree no longer references `marketing/`.
+- `.gitignore` now includes `marketing/` as a safety net so launch drafts don't get re-added accidentally.
+
+---
+
 ## [0.2.0] — 2026-05-02
 
 ### Added

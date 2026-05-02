@@ -1,7 +1,14 @@
 # Receipts
 
+![Receipts — AI agents that ship with receipts.](assets/og-card.png)
+
 > **AI agents that ship with receipts.**
-> Production observability, change tracking, and codebase memory — packaged as a portable skill for any AI coding agent.
+>
+> Production observability and codebase memory for AI coding agents — a portable skill for **Claude Code, Cursor, Cline, Windsurf, Roo Code, and OpenHands** that forces structured logging, error taxonomies, change ledgers, debug maps, and incident logs on every change.
+
+**Receipts** is a drop-in skill / `.cursorrules` / custom-instructions package that turns any AI coding agent into a Principal Reliability Engineer + Codebase Historian at the same time. It scans your repo, classifies each file's observability, maintains an append-only change ledger, propagates correlation IDs, enforces a stable error taxonomy, and treats missing logs and missing error handling as **production bugs — not nice-to-haves**.
+
+Stop shipping vibe-coded apps that can't tell you what broke, when, or why.
 
 ---
 
@@ -30,6 +37,16 @@ Receipts forces any AI coding agent to behave like a **Principal Reliability Eng
 - treats missing logs and missing error handling as production bugs
 
 Works on existing repos (**remediation mode**) and new repos (**greenfield mode**).
+
+---
+
+## What it works with
+
+**AI coding agents**: Claude Code (skill), Cursor (`.cursorrules`), Cline (custom instructions), Windsurf (`.windsurfrules`), Roo Code (custom modes), OpenHands (microagents), and any LLM with a system-prompt slot.
+
+**Languages and logging libs** (concrete cookbook patterns): Node.js + pino, Python + structlog, Go + `log/slog`. PRs welcome for Ruby + ougai, Java + logback, Rust + tracing, .NET + Serilog, Elixir + Logger.
+
+**Use cases**: AI code review, debugging AI-generated code, audit trail for agentic development, structured logging for LLM-generated services, production observability, error taxonomy enforcement, codebase memory, incident response, root-cause analysis, postmortem-ready code, SRE-grade prompt engineering.
 
 ---
 
@@ -111,14 +128,10 @@ Receipts/
 │   ├── node-pino.md                      ← logger + correlation + errors + dep wrapper
 │   ├── python-structlog.md               ← FastAPI + Celery patterns
 │   └── go-slog.md                        ← context-based correlation + generics
-├── marketing/                            ← launch materials
-│   ├── launch-tweet-thread.md            ← 8-tweet launch thread
-│   ├── launch-posts.md                   ← Show HN + Reddit drafts
-│   └── launch-checklist.md               ← step-by-step launch day
 └── assets/
-    ├── og-card.png                       ← 1280×640 social preview, drop into repo Settings
-    ├── og-card.svg                       ← vector source — edit, regenerate PNG
-    └── og-card.html                      ← browser-renderable version for screenshots
+    ├── og-card.png                       ← 1280×640 social preview
+    ├── og-card.svg                       ← vector source
+    └── og-card.html                      ← browser-renderable version
 ```
 
 ---
@@ -177,3 +190,11 @@ Built because most AI-generated codebases can't tell you what they did, when, or
 ## License
 
 MIT — see [LICENSE](LICENSE). Copyright © 2026 trams (@Tramsnf).
+
+---
+
+## Topics
+
+`ai-coding-agent` · `claude-code` · `claude-code-skill` · `cursor` · `cursor-rules` · `cline` · `windsurf` · `roo-code` · `openhands` · `prompt-engineering` · `structured-logging` · `pino` · `structlog` · `slog` · `correlation-ids` · `error-taxonomy` · `error-handling` · `audit-trail` · `change-ledger` · `debug-map` · `incident-log` · `observability` · `sre` · `production-observability` · `production-ready` · `debug-ai-generated-code` · `agentic-coding` · `agentic-development` · `llm-coding-agent` · `llm-tools` · `codebase-memory` · `developer-tools` · `ai-developer-tools` · `code-instrumentation` · `anti-vibe-coding` · `mit-licensed`
+
+> **Search**: AI coding agent · Claude Code skill · Cursor rules · Cline custom instructions · Windsurf rules · Roo Code custom mode · OpenHands microagent · prompt engineering for production code · structured logging for AI-generated code · correlation IDs · error codes · audit trail for AI agents · debug map · incident log · postmortem-ready code · agentic development · LLM coding agent · codebase memory · developer tools · anti vibe coding

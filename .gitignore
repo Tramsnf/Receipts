@@ -11,3 +11,7 @@ node_modules/
 .cache/
 dist/
 build/
+
+# Personal launch / marketing materials live outside the repo.
+# See ../Receipts-launch/ on the maintainer's machine.
+marketing/
