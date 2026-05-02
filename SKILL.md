@@ -150,6 +150,26 @@ Recipes work identically — they degrade to a serial walk. Slower but functiona
 
 ---
 
+## Log persistence (mandatory)
+
+Receipts enforces log *shape* (fields, error codes, redaction). Log *destination* is your decision — but **it must be a decision**, documented in `docs/system/observability_spec.md` under "Log sinks & retention" before any code ships.
+
+A logger that emits perfectly-shaped JSON to stdout, with no sink, is **not saved logs** — it's a live tail that vanishes when the process exits.
+
+Defaults the agent should propose if the user hasn't decided:
+
+- **Local dev**: structured JSON to stdout AND a rotated file under `./logs/app.log` (daily, 50MB max, keep 14 days). `./logs/` added to `.gitignore`.
+- **Staging / prod**: stdout (12-factor) captured by the orchestrator (Docker / k8s / systemd / PM2), shipped to an aggregator (Datadog / CloudWatch / Loki / Splunk / Elasticsearch), retention documented at the aggregator level.
+
+The `bootstrap` recipe prompts for sink choices and writes them to `observability_spec.md`. The `scan-only` recipe verifies sinks are both documented AND wired in code (not just on paper). The `remediate-all` recipe will not ship code if the sink section is unfilled — fail loud, prompt the user, do not assume.
+
+See cookbooks for concrete persistence patterns:
+- `cookbooks/node-pino.md` — pino + pino-roll
+- `cookbooks/python-structlog.md` — structlog + RotatingFileHandler
+- `cookbooks/go-slog.md` — slog + lumberjack
+
+---
+
 ## Auto-bootstrap on first invocation
 
 If the user invokes the skill in a repo without `docs/system/`, run the `bootstrap` recipe automatically before doing the user's actual request. Announce both clearly:

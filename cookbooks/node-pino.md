@@ -298,6 +298,76 @@ queue.process('charge.process', async (job) => {
 });
 ```
 
+## 9. Log persistence — sinks beyond stdout
+
+Stdout vanishes when the process exits. For local dev, dual-write to a rotated file. For staging/prod, ship stdout to an aggregator.
+
+### Local dev: stdout + rotated file (pino-roll)
+
+Install: `npm i pino pino-roll`
+
+```ts
+// src/observability/logger.ts
+import pino from 'pino';
+
+const transport = pino.transport({
+  targets: [
+    // 1. stdout (12-factor) — captured by your runtime in prod
+    { target: 'pino/file', level: 'info', options: { destination: 1 } },
+    // 2. local rotated file — useful in dev, off in prod (set FILE_LOG=0)
+    ...(process.env.FILE_LOG !== '0'
+      ? [{
+          target: 'pino-roll',
+          level: 'info',
+          options: {
+            file: 'logs/app',
+            frequency: 'daily',
+            size: '50m',
+            mkdir: true,
+            extension: '.log',
+            limit: { count: 14 },  // keep 14 days
+          },
+        }]
+      : []),
+  ],
+});
+
+export const logger = pino({ /* base config from §1 */ }, transport);
+```
+
+Add `logs/` to `.gitignore`. View tail with `tail -f logs/app-$(date +%Y-%m-%d).log | jq`.
+
+### Production: stdout + ship to aggregator
+
+Pick one of the official transports:
+
+| Aggregator | Transport |
+|---|---|
+| Datadog | `pino-datadog-transport` |
+| CloudWatch | `pino-cloudwatch-transport` |
+| Loki / Grafana Cloud | `pino-loki` |
+| Elasticsearch / OpenSearch | `pino-elasticsearch` |
+| Splunk | `pino-socket` to HEC |
+
+```ts
+// production transport (replace local-file target with the aggregator)
+const transport = pino.transport({
+  targets: [
+    { target: 'pino/file', level: 'info', options: { destination: 1 } },  // stdout
+    {
+      target: 'pino-loki',
+      level: 'info',
+      options: {
+        host: process.env.LOKI_URL,
+        labels: { service: process.env.SERVICE_NAME, env: process.env.NODE_ENV },
+      },
+    },
+  ],
+});
+```
+
+Document the chosen transport in `docs/system/observability_spec.md` under "Log sinks & retention" — before this code ships.
+
 ## What this gives you
 
 - Every HTTP request has a correlation_id propagated through the entire async tree
@@ -306,3 +376,4 @@ queue.process('charge.process', async (job) => {
 - Every error has a stable `error_code` and `error_class`
 - Secrets are redacted at the logger level
 - Background jobs inherit correlation IDs from their producers
+- **Logs are durable** — local rotation keeps 14 days, prod ships to your aggregator

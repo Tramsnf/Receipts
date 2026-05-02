@@ -25,11 +25,16 @@ Scaffold `docs/system/` baseline files, detect the stack, run the heuristic scan
 4. **Heuristic observability scan** — `python3 scripts/scan-observability.py --md <repo-root> > docs/system/_scan_baseline.md`
 5. **Pre-fill `system_inventory.md`** with detected stack, entrypoints, dependencies, environments (read `.env.example`, `config/*`, `*.config.*`).
 6. **Pre-fill `file_index.md`** with the worst offenders from the scan plus any files matching critical-path patterns (handlers, routes, middleware, jobs, workers, migrations).
-7. **Append a bootstrap entry** to `change_ledger.md` and `work_log.md`.
-8. **Report** — print:
+7. **Decide log sinks** — fill in the "Log sinks & retention" table in `observability_spec.md`. If the user hasn't decided, propose the safe defaults:
+   - local: stdout + rotated file under `./logs/app.log` (daily, 50MB, keep 14)
+   - prod: stdout (12-factor) → orchestrator → aggregator (ask the user which one or detect from infra files: `ecs-task-definition.json`, `serverless.yml`, k8s manifests, Datadog agent configs)
+   Add `logs/` to `.gitignore` if writing files locally.
+8. **Append a bootstrap entry** to `change_ledger.md` and `work_log.md`.
+9. **Report** — print:
    - stack detected
    - file count + classification breakdown
    - top 10 highest-risk files
+   - log sinks chosen per env
    - recommended next recipe (`scan-only` for review, `remediate-all` to fix, `audit-flow <name>` to focus)
 
 ## Parallel strategy (Claude Code)

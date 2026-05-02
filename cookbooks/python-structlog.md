@@ -293,6 +293,75 @@ def process_charge(self, payload: dict):
         _run()
 ```
 
+## 9. Log persistence — sinks beyond stdout
+
+Stdout vanishes when the process exits. Dual-write to a rotated file locally; ship stdout to an aggregator in prod.
+
+### Local dev: stdout + rotated file
+
+```python
+# src/observability/sinks.py
+import logging
+import os
+from logging.handlers import TimedRotatingFileHandler
+
+def configure_handlers():
+    os.makedirs("logs", exist_ok=True)
+
+    handlers: list[logging.Handler] = [logging.StreamHandler()]  # stdout
+
+    if os.environ.get("FILE_LOG", "1") != "0":
+        file_handler = TimedRotatingFileHandler(
+            "logs/app.log",
+            when="midnight",
+            interval=1,
+            backupCount=14,        # keep 14 days
+            encoding="utf-8",
+            utc=True,
+        )
+        handlers.append(file_handler)
+
+    logging.basicConfig(
+        level=os.environ.get("LOG_LEVEL", "INFO"),
+        handlers=handlers,
+        format="%(message)s",      # structlog renders the JSON itself
+        force=True,
+    )
+```
+
+Call `configure_handlers()` once at startup before importing the structlog logger from §1. Add `logs/` to `.gitignore`. Tail with `tail -f logs/app.log | jq`.
+
+### Production: stdout + ship to aggregator
+
+| Aggregator | Library |
+|---|---|
+| Datadog | `ddtrace.contrib.logging` (auto-correlates traces) |
+| CloudWatch | `watchtower` |
+| Loki / Grafana Cloud | `python-logging-loki` |
+| Elasticsearch | `python-ecs-logging` + Filebeat or `cmreslogs` |
+| Splunk | `splunk_handler` |
+
+```python
+# add the aggregator handler in production only
+import os, logging
+
+def configure_handlers():
+    handlers: list[logging.Handler] = [logging.StreamHandler()]  # stdout always
+
+    if os.environ.get("APP_ENV") == "prod":
+        import logging_loki
+        loki = logging_loki.LokiHandler(
+            url=os.environ["LOKI_URL"],
+            tags={"service": os.environ.get("SERVICE_NAME"), "env": "prod"},
+            version="1",
+        )
+        handlers.append(loki)
+
+    logging.basicConfig(level="INFO", handlers=handlers, format="%(message)s", force=True)
+```
+
+Document the chosen aggregator in `docs/system/observability_spec.md` under "Log sinks & retention" before this code ships.
+
 ## What this gives you
 
 - Every request and job has a correlation_id propagated via `contextvars`

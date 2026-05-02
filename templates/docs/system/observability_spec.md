@@ -142,3 +142,43 @@ Each error class needs a stable code, a clear log shape, a consistent response s
 - [ ] Worker / queue health (depth, throughput, age, DLQ)
 - [ ] Auth health (login success / failure rate, suspicious failure spikes)
 - [ ] Error taxonomy view (top error codes, trends)
+
+---
+
+## Log sinks & retention
+
+> **Mandatory.** The Receipts protocol enforces log *shape*. Log *destination* is your decision — but it must be a decision, documented here, before code ships. By default `logger.info(...)` writes to stdout and disappears when the process ends. That's not "saved."
+
+### Sinks per environment
+
+Fill in. Leaving a row blank means logs are ephemeral in that environment.
+
+| Env | Primary sink | Secondary | Rotation | Retention |
+|---|---|---|---|---|
+| local | stdout (terminal) | `./logs/app.log` (daily rotation, 50MB max, keep 14) | daily / size | 14 days |
+| dev | stdout → container runtime | <aggregator, e.g. Datadog / CloudWatch / Loki> | n/a | <X> days |
+| staging | stdout → orchestrator | <aggregator> | n/a | <X> days |
+| prod | stdout → orchestrator | <aggregator + cold storage if regulated> | n/a | <X> days hot, <Y> days cold |
+
+### Wiring checklist
+
+- [ ] Logger emits JSON to stdout (12-factor)
+- [ ] Local dev: file rotation handler writes to `./logs/` with size + age limits
+- [ ] `./logs/` is in `.gitignore`
+- [ ] Prod stdout captured by orchestrator (Docker / k8s / systemd / PM2)
+- [ ] Prod shipper agent forwards to aggregator (Datadog / CloudWatch / Loki / Splunk / Elasticsearch)
+- [ ] Retention policy enforced at the aggregator (not just hoped for)
+- [ ] Backup of regulated logs if applicable (GDPR / HIPAA / PCI / SOC2)
+- [ ] Alerts wired to the aggregator (see "Alert candidates" above)
+- [ ] Log volume budget set (cardinality + GB/day cap to avoid runaway cost)
+
+### Why not just stdout?
+
+Stdout is captured by the runtime. You can `docker logs` or `kubectl logs` to read it, but:
+
+- containers/pods churn — old logs vanish
+- can't grep across services without an aggregator
+- can't alert on patterns
+- compliance often requires write-once storage
+
+A sink decision means choosing **how the stdout stream becomes durable** — even if the answer is "k8s ships to CloudWatch, 30 days hot."

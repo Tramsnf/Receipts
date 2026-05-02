@@ -408,6 +408,81 @@ func ChargeHandler(stripeClient StripeClient) http.HandlerFunc {
 }
 ```
 
+## 8. Log persistence — sinks beyond stdout
+
+Stdout vanishes when the process exits. Dual-write to a rotated file locally; ship stdout to an aggregator in prod.
+
+### Local dev: stdout + rotated file (lumberjack)
+
+Install: `go get gopkg.in/natefinch/lumberjack.v2`
+
+```go
+// internal/observability/logger.go (replace the init from §1)
+package observability
+
+import (
+	"io"
+	"log/slog"
+	"os"
+	"strings"
+
+	"gopkg.in/natefinch/lumberjack.v2"
+)
+
+func init() {
+	level := slog.LevelInfo
+	switch strings.ToLower(os.Getenv("LOG_LEVEL")) {
+	case "debug":
+		level = slog.LevelDebug
+	case "warn":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	}
+
+	writers := []io.Writer{os.Stdout}
+
+	if os.Getenv("FILE_LOG") != "0" {
+		_ = os.MkdirAll("logs", 0o755)
+		writers = append(writers, &lumberjack.Logger{
+			Filename:   "logs/app.log",
+			MaxSize:    50,    // megabytes
+			MaxBackups: 14,    // keep 14 rotated files
+			MaxAge:     30,    // days
+			Compress:   true,
+		})
+	}
+
+	multi := io.MultiWriter(writers...)
+	h := slog.NewJSONHandler(multi, &slog.HandlerOptions{
+		Level:       level,
+		ReplaceAttr: redact,
+	})
+	base := slog.New(h).With(
+		"service", os.Getenv("SERVICE_NAME"),
+		"env", os.Getenv("APP_ENV"),
+		"version", firstNonEmpty(os.Getenv("APP_VERSION"), os.Getenv("GIT_SHA")),
+	)
+	slog.SetDefault(base)
+}
+```
+
+Add `logs/` to `.gitignore`. Tail with `tail -f logs/app.log | jq`.
+
+### Production: stdout + ship to aggregator
+
+12-factor-style: emit JSON to stdout and let the orchestrator ship it.
+
+| Aggregator | Approach |
+|---|---|
+| Datadog | sidecar agent reads stdout |
+| CloudWatch | ECS / Fargate log driver, EKS Fluent Bit |
+| Loki | Promtail or Grafana Agent reading container logs |
+| Elasticsearch / OpenSearch | Filebeat or Fluent Bit |
+| Splunk | Universal Forwarder or HEC + Fluent Bit |
+
+For direct in-process shipping (rare in Go — orchestrator is preferred), wrap an additional writer in the `MultiWriter`. Document the chosen path in `docs/system/observability_spec.md` under "Log sinks & retention" before this code ships.
+
 ## What this gives you
 
 - Correlation IDs propagated through `context.Context`
@@ -416,3 +491,4 @@ func ChargeHandler(stripeClient StripeClient) http.HandlerFunc {
 - Stable `error_code` + `error_class` on every failure
 - Secret keys redacted at the slog handler level
 - HTTP middleware sets correlation headers on response for downstream services
+- **Logs are durable** — local rotation keeps 14 backups (50MB each), prod ships via the orchestrator

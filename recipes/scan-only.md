@@ -15,13 +15,19 @@ Produce a current-state report of the repo's observability posture so the user c
    - `scripts/log-coverage.sh . > docs/system/_log_coverage_<date>.md`
 2. **Verify the heuristic** — sample 5–10 files per classification bucket. Confirm the heuristic call by reading the actual code. Promote/demote files as needed.
 3. **Walk critical flows** — identify routes, jobs, workers, dep calls. For each, follow control flow and confirm logs at start / checkpoints / success / failure.
-4. **Synthesize a summary**:
+4. **Verify log sinks** — read `docs/system/observability_spec.md` "Log sinks & retention" section. Confirm:
+   - sinks are filled in for every environment
+   - the wiring checklist boxes are actually true (grep code for the transport package; check `.gitignore` for `logs/`)
+   - retention is documented at the aggregator level, not just hoped for
+   - Flag any env without a sink as a critical gap.
+5. **Synthesize a summary**:
    - counts per classification (fully / partial / minimal / none)
    - top 10 highest-risk gaps (lowest score × highest blast radius)
    - flows with the worst log coverage
    - likely secret-leak hotspots (from redaction lint)
+   - log-sink gaps per environment
    - recommended next recipe + scope estimate
-5. **Append a `work_log.md` entry** — record what was scanned, what was sampled, what was concluded. Do **NOT** modify any production code.
+6. **Append a `work_log.md` entry** — record what was scanned, what was sampled, what was concluded. Do **NOT** modify any production code.
 
 ## Parallel strategy (Claude Code)
 

@@ -6,6 +6,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ---
 
+## [0.3.2] — 2026-05-02
+
+### Added
+
+- **Log persistence is now mandatory.** Receipts has always enforced log *shape*; this release closes the gap on log *destination*. A `logger.info(...)` call to stdout that vanishes when the process exits is no longer considered "saved logs."
+- New **"Log sinks & retention"** section in `templates/docs/system/observability_spec.md`:
+  - sinks-per-environment table
+  - wiring checklist (stdout, rotation, gitignore, orchestrator capture, shipper agent, retention, backup, alerts, volume budget)
+  - "Why not just stdout?" explanation
+- New **"Log persistence (mandatory)"** section in `SKILL.md` — sink decision must be documented in `observability_spec.md` before any code ships. `remediate-all` will fail loud if the sink section is unfilled.
+- **Cookbook persistence sections** (one per language):
+  - `cookbooks/node-pino.md` §9 — pino + pino-roll for local rotation, transport options for Datadog / CloudWatch / Loki / Elasticsearch / Splunk
+  - `cookbooks/python-structlog.md` §9 — `TimedRotatingFileHandler` for local, options for Datadog / CloudWatch / Loki / ES / Splunk
+  - `cookbooks/go-slog.md` §8 — `lumberjack` for local rotation, orchestrator-shipped patterns for prod
+- **`bootstrap` recipe** — new step 7 to fill in log sinks during first-touch setup, with safe defaults and infra-detection hints.
+- **`scan-only` recipe** — new step 4 to verify log-sink documentation matches actual code (greps for transport packages, checks `.gitignore` for `logs/`).
+
+### Notes
+
+This release was prompted by a real user question: *"does this tell the system to save the log?"* — the honest answer was no, the skill standardized log shape but not destination. v0.3.2 closes that gap with mandatory sink decisions, copyable persistence patterns per language, and verification baked into the recipes.
+
+---
+
 ## [0.3.1] — 2026-05-02
 
 ### Added
