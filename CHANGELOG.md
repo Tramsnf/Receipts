@@ -6,6 +6,31 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ---
 
+## [0.3.4] — 2026-05-02
+
+### Added
+
+- **`examples/quickstart-python/`** — FastAPI + structlog + `TimedRotatingFileHandler`. Listens on port 3001. Writes structured JSON to stdout AND `logs/app.log` (daily rotation, 14 backups, UTC midnight). Verified locally: 4KB written for a basic three-request exercise with correlation IDs propagated via `structlog.contextvars`.
+- **`examples/quickstart-go/`** — net/http + `log/slog` + lumberjack. Listens on port 3002. Writes structured JSON to stdout AND `logs/app.log` (50MB cap, 14 backups, 30-day max age, gzip-compressed). Verified locally: 3.5KB written for a basic three-request exercise with correlation IDs propagated via `context.Context`. Requires Go 1.21+.
+
+### Changed
+
+- `examples/README.md` index now lists all three quickstarts side-by-side with stack, port, and run command.
+- Main `README.md` directory tree includes all three demos.
+- Main `README.md` FAQ "Where do logs actually go?" points to all three demos.
+
+### Verification matrix
+
+| Demo | Port | Sink | File | Lines per 3 requests |
+|---|---|---|---|---|
+| `quickstart-node` | 3000 | stdout + pino-roll | `logs/app.YYYY-MM-DD.N.log` | 11 |
+| `quickstart-python` | 3001 | stdout + TimedRotatingFileHandler | `logs/app.log` (rotates to `app.log.YYYY-MM-DD`) | ~10 |
+| `quickstart-go` | 3002 | stdout + lumberjack | `logs/app.log` | ~9 |
+
+All three verified end-to-end on macOS 25 with their respective runtimes (Node 18+, Python 3.13, Go 1.26).
+
+---
+
 ## [0.3.3] — 2026-05-02
 
 ### Added

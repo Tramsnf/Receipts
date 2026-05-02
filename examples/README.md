@@ -2,11 +2,13 @@
 
 Runnable demos that prove the Receipts logger pattern works end-to-end. Clone the repo, `cd` into one, follow the README, and watch structured JSON land in both stdout and a rotated file.
 
-| Demo | Stack | Run |
-|---|---|---|
-| [`quickstart-node`](quickstart-node/) | Node + Express + pino + pino-roll | `npm install && npm start` |
+| Demo | Stack | Port | Run |
+|---|---|---|---|
+| [`quickstart-node`](quickstart-node/) | Express + pino + pino-roll | 3000 | `npm install && npm start` |
+| [`quickstart-python`](quickstart-python/) | FastAPI + structlog + TimedRotatingFileHandler | 3001 | `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && python app.py` |
+| [`quickstart-go`](quickstart-go/) | net/http + log/slog + lumberjack | 3002 | `go run main.go` (Go 1.21+) |
 
-PRs welcome for `quickstart-python` (FastAPI + structlog) and `quickstart-go` (net/http + slog + lumberjack).
+All three were verified locally — each writes structured JSON logs to a rotated file under `logs/` while also emitting to stdout.
 
 ## What the demos show
 
