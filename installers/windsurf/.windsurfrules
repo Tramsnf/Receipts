@@ -1,0 +1,78 @@
+# Receipts Protocol — Windsurf Cascade Rules
+# Source: github.com/Tramsnf/Receipts
+
+You operate under the Receipts protocol on every task in this workspace.
+
+**Treat missing logging, missing debug context, and missing error handling as production bugs, not nice-to-haves.**
+
+## Codebase scan first
+
+Before changing code: scan the relevant area, build a mental model of modules / request flow / state / integrations / error paths, and classify each file's observability as fully | partially | minimally | not observable.
+
+## Required artifacts in this repo
+
+Maintain these files. Generate from the templates in `templates/docs/system/` on first run.
+
+- `docs/system/system_inventory.md`
+- `docs/system/file_index.md`
+- `docs/system/change_ledger.md` (append-only)
+- `docs/system/work_log.md`
+- `docs/system/debug_map.md`
+- `docs/system/incidents.md`
+- `docs/system/observability_spec.md`
+
+## Instrumentation contract for every meaningful execution path
+
+- log start
+- log key checkpoints (state changes, dep calls, branches, retries)
+- log success with `duration_ms`
+- log failure with operation, module, correlation_id, safe IDs, error_class, error_code, sanitized context, likely failing boundary, remediation hint
+
+Required log fields: timestamp, level, service, env, version, correlation_id, request_id|job_id|trace_id, module, function, operation, status, duration_ms, error_code, error_class, message, debug_context.
+
+Redact secrets, tokens, passwords, raw auth headers, regulated PII.
+
+## Error handling contract
+
+No silent failures. No swallowed exceptions. No empty catch blocks. No vague returns. No print-only debugging. No hidden fallbacks. No retry without retry logs. No async work without lifecycle logs. No state mutation without audit trail.
+
+Error classes (each gets a stable code):
+- validation `E_VAL_*`
+- auth/authz `E_AUTH_*`
+- business `E_BIZ_*`
+- dependency `E_DEP_*`
+- timeout `E_TMO_*`
+- database `E_DB_*`
+- network `E_NET_*`
+- concurrency `E_CONC_*`
+- internal `E_INT_*`
+
+## Per-layer expectations
+
+- **Routes/handlers**: request start, metadata, outcome, failures, latency
+- **Services**: op start, decisions, external calls, state changes, failures
+- **Data layer**: query ops, retry/timeout, not-found vs failure distinction
+- **Jobs/workers**: enqueue, dequeue, start, checkpoints, retries, backoff, DLQ, completion, duration
+- **External integrations**: target dep, op, response class, timeout, retry, circuit-break, failure reason
+- **Auth**: flow start, decision, denied access, token transitions, suspicious failures — never log secrets
+
+## Task lifecycle
+
+1. Discovery → 2. Map → 3. Gap analysis → 4. Plan → 5. Baseline → 6. Implement → 7. Validate → 8. Document → 9. Report
+
+A task is done only when: code inspected, changes in change_ledger.md, logs adequate, docs updated, validation performed (or pending status explicit), user can answer what changed / what broke / why / what's next.
+
+## Final report
+
+Always include: repo scan summary, architecture summary, observability gaps, changes made, files changed, logs added, bugs found/fixed, validation performed, remaining risks, next actions, files still missing logs, files upgraded to production-grade observability, error classes added, correlation/trace propagation status.
+
+## Hard bans
+
+- hiding errors in try/catch
+- catch-and-continue with no log
+- returning null/false on failure silently
+- console-only observability
+- "something failed" messages
+- logging raw secrets
+- implicit fallback with no trace
+- untracked feature or bug-fix changes

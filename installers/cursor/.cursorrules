@@ -1,0 +1,110 @@
+# Receipts Protocol — Agent Operating Rules
+# Source: github.com/Tramsnf/Receipts
+
+You are operating under the Receipts protocol.
+
+Treat missing logging, missing debug context, and missing error handling as production bugs, not nice-to-haves.
+
+## Before changing code
+
+- Scan the relevant codebase area, not just one file
+- Build a mental map: modules, request flow, state, integrations, error paths
+- Classify each file's observability: fully | partially | minimally | not observable
+- Identify gaps before implementing
+
+## Required artifacts (create on first run, maintain after)
+
+- `docs/system/system_inventory.md` — architecture, deps, runtime entrypoints
+- `docs/system/file_index.md` — purpose, owner, blast radius per critical file
+- `docs/system/change_ledger.md` — append-only log of every meaningful change
+- `docs/system/work_log.md` — chronological agent action log
+- `docs/system/debug_map.md` — flow → entrypoints, logs, failure points, repro
+- `docs/system/incidents.md` — bugs, root causes, fixes, prevention
+- `docs/system/observability_spec.md` — log schema, error taxonomy, correlation
+
+## Mandatory instrumentation per execution path
+
+- log start of operation
+- log key checkpoints (state transitions, dep calls, branching, retries)
+- log success with `duration_ms` where useful
+- log failure with: operation, module, correlation_id, safe IDs, error_class, error_code, sanitized context, likely failing boundary, remediation hint
+
+Required log fields: `timestamp, level, service, env, version, correlation_id, request_id|job_id|trace_id, module, function, operation, status, duration_ms, error_code, error_class, message, debug_context`.
+
+Redact secrets, tokens, passwords, raw auth headers, regulated PII.
+
+## Mandatory error handling
+
+- no silent failures
+- no swallowed exceptions
+- no empty catch blocks
+- no vague generic returns
+- no print-only debugging
+- no hidden fallback without logs
+- no retry without retry logs
+- no async work without lifecycle logs
+- no state mutation without audit trail
+
+Classify each error: validation, auth, business rule, dependency, timeout, db, network, concurrency, internal. Each gets a stable error code (E_VAL_*, E_AUTH_*, E_BIZ_*, E_DEP_*, E_TMO_*, E_DB_*, E_NET_*, E_CONC_*, E_INT_*).
+
+## Per-layer expectations
+
+- Routes/handlers: request start, metadata, outcome, failures, latency
+- Services: op start, decisions, external calls, state changes, failures
+- Data layer: query/persist ops, retry/timeout, not-found vs failure distinction
+- Jobs/workers: enqueue, dequeue, start, checkpoints, retries, backoff, DLQ, completion, duration
+- External integrations: target dep, op, response class, timeout, retry, circuit-break, failure reason
+- Auth: flow start, decision, denied access, token transitions, suspicious failures (NEVER log secrets)
+
+## Operating order for every task
+
+1. Discovery — scan repo
+2. Map — model modules, flow, state, integrations
+3. Gap analysis — classify files, identify missing logs/error boundaries
+4. Plan — scope, risk, additions needed, rollback
+5. Baseline — capture current behavior, test status, blind spots
+6. Implement — minimal but complete; add structured logs and error boundaries
+7. Validate — tests, type checks, lint, build, manual repro
+8. Document — update ledger, work log, debug map, incidents, observability spec
+9. Report — what changed, what's risky, what's next
+
+## Definition of done
+
+- relevant code inspected
+- changes traceable in change_ledger.md
+- logs/observability added or confirmed adequate
+- docs updated
+- validation performed (or pending status explicit and explained)
+- user can answer: what changed, what broke, why, what to do next
+
+## Final report sections (always include)
+
+1. Repository scan summary
+2. Architecture and flow summary
+3. Observability gaps found
+4. Changes made
+5. Files changed
+6. Logs added/improved
+7. Bugs found/fixed
+8. Validation performed
+9. Remaining risks
+10. Next actions
+11. Files still missing logs/error handling
+12. Files upgraded to production-grade observability
+13. Error classes added/standardized
+14. Correlation/trace propagation status
+
+## Bans
+
+- try/catch that hides errors
+- catch and continue with no log
+- returning null/false on failure with no explanation
+- console-only observability
+- generic "something failed" messages
+- logging raw secrets
+- implicit fallback with no trace
+- async work with no lifecycle visibility
+- state mutation with no audit trail
+- untracked feature/bug-fix changes
+
+Do not claim a task is done unless verified. If something cannot be verified, state exactly what remains unverified and why.

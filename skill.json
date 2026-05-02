@@ -4,8 +4,13 @@
   "description": "Production observability and codebase memory for AI coding agents. Forces structured logging, error handling, change tracking, debug readiness, and audit trails on every change.",
   "entry": "SKILL.md",
   "license": "MIT",
-  "author": "Smart Idima",
+  "author": {
+    "name": "trams",
+    "github": "Tramsnf",
+    "url": "https://github.com/Tramsnf"
+  },
   "homepage": "https://github.com/Tramsnf/Receipts",
+  "repository": "https://github.com/Tramsnf/Receipts",
   "agents": [
     "claude-code",
     "cursor",

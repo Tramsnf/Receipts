@@ -51,21 +51,31 @@ git clone https://github.com/Tramsnf/Receipts.git .claude/skills/receipts
 
 Invoke with `/receipts` or by referencing it in conversation.
 
-### Cursor / Windsurf
+### Cursor
 
-Copy `prompts/system.md` into the global rules / system prompt slot. Copy `templates/docs/system/` into your repo at `docs/system/` on first run.
+Copy [`installers/cursor/.cursorrules`](installers/cursor/.cursorrules) into the root of the project you want governed.
 
-### Cline / Roo Code
+### Windsurf
 
-Add `prompts/system.md` content as a custom instruction. Reference `SKILL.md` as the operating contract.
+Copy [`installers/windsurf/.windsurfrules`](installers/windsurf/.windsurfrules) into the root of the project.
+
+### Cline
+
+Paste [`installers/cline/custom-instructions.md`](installers/cline/custom-instructions.md) into the Cline custom instructions slot in VS Code settings.
+
+### Roo Code
+
+Paste [`installers/roo-code/system-prompt.md`](installers/roo-code/system-prompt.md) into a custom mode's system prompt.
 
 ### OpenHands
 
-Mount the folder as a workspace skill and load `SKILL.md` as the agent system prompt.
+Drop [`installers/openhands/microagents/receipts.md`](installers/openhands/microagents/receipts.md) into `.openhands/microagents/receipts.md` in your repo.
 
 ### Generic LLM workflow
 
-Treat `SKILL.md` as the operating contract. Feed it to the agent as the system prompt. Run tasks normally — the agent will scaffold `docs/system/` baseline files on the first task.
+Treat [`SKILL.md`](SKILL.md) as the operating contract. Feed it to the agent as the system prompt. Run tasks normally — the agent will scaffold `docs/system/` baseline files on the first task.
+
+> Full per-agent install guide: [`installers/INSTALL.md`](installers/INSTALL.md). Language-specific instrumentation patterns: [`cookbooks/`](cookbooks/).
 
 ---
 
@@ -76,20 +86,39 @@ Receipts/
 ├── SKILL.md                              ← agent contract (entry point)
 ├── skill.json                            ← portable manifest
 ├── README.md                             ← this file
-├── LICENSE
+├── LICENSE                               ← MIT
 ├── CHANGELOG.md
-├── prompts/
+├── prompts/                              ← modular prompts
 │   ├── system.md                         ← full system prompt
 │   ├── role.md                           ← role definition
 │   └── user.md                           ← task framing template
-└── templates/docs/system/
-    ├── system_inventory.md               ← architecture + dependencies
-    ├── file_index.md                     ← purpose + blast radius per file
-    ├── change_ledger.md                  ← append-only change log
-    ├── work_log.md                       ← chronological agent actions
-    ├── debug_map.md                      ← flows → logs → failure points
-    ├── incidents.md                      ← bugs, root causes, fixes
-    └── observability_spec.md             ← log schema + error taxonomy
+├── templates/docs/system/                ← baseline doc templates
+│   ├── system_inventory.md               ← architecture + dependencies
+│   ├── file_index.md                     ← purpose + blast radius per file
+│   ├── change_ledger.md                  ← append-only change log
+│   ├── work_log.md                       ← chronological agent actions
+│   ├── debug_map.md                      ← flows → logs → failure points
+│   ├── incidents.md                      ← bugs, root causes, fixes
+│   └── observability_spec.md             ← log schema + error taxonomy
+├── installers/                           ← drop-in files per agent
+│   ├── INSTALL.md
+│   ├── cursor/.cursorrules
+│   ├── windsurf/.windsurfrules
+│   ├── cline/custom-instructions.md
+│   ├── roo-code/system-prompt.md
+│   └── openhands/microagents/receipts.md
+├── cookbooks/                            ← language-specific patterns
+│   ├── node-pino.md                      ← logger + correlation + errors + dep wrapper
+│   ├── python-structlog.md               ← FastAPI + Celery patterns
+│   └── go-slog.md                        ← context-based correlation + generics
+├── marketing/                            ← launch materials
+│   ├── launch-tweet-thread.md            ← 8-tweet launch thread
+│   ├── launch-posts.md                   ← Show HN + Reddit drafts
+│   └── launch-checklist.md               ← step-by-step launch day
+└── assets/
+    ├── og-card.png                       ← 1280×640 social preview, drop into repo Settings
+    ├── og-card.svg                       ← vector source — edit, regenerate PNG
+    └── og-card.html                      ← browser-renderable version for screenshots
 ```
 
 ---
@@ -139,6 +168,12 @@ Issues and PRs welcome. Especially:
 
 ---
 
+## Maintainer
+
+**trams** — [@Tramsnf](https://github.com/Tramsnf)
+
+Built because most AI-generated codebases can't tell you what they did, when, or why. This skill makes them.
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Copyright © 2026 trams (@Tramsnf).

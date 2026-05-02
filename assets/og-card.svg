@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <radialGradient id="glow" cx="20%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#22c55e" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="title-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fafafa"/>
+      <stop offset="100%" stop-color="#a3e635"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="#0a0a0a"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <ellipse cx="280" cy="200" rx="500" ry="300" fill="url(#glow)"/>
+
+  <!-- Title -->
+  <text x="80" y="240"
+        font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
+        font-size="180" font-weight="900" fill="url(#title-gradient)" letter-spacing="-8">Receipts</text>
+
+  <!-- Subtitle -->
+  <text x="80" y="306"
+        font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
+        font-size="32" font-weight="500" fill="#a3a3a3">AI agents that ship with receipts.</text>
+
+  <!-- Code snippet block -->
+  <g transform="translate(80, 380)">
+    <rect width="1120" height="180" rx="14" fill="#111111" stroke="#262626" stroke-width="1"/>
+    <!-- Window dots -->
+    <circle cx="28" cy="28" r="6" fill="#ef4444"/>
+    <circle cx="50" cy="28" r="6" fill="#eab308"/>
+    <circle cx="72" cy="28" r="6" fill="#22c55e"/>
+    <text x="32" y="74"
+          font-family="'SF Mono', 'JetBrains Mono', Menlo, Monaco, monospace"
+          font-size="20" fill="#525252">$</text>
+    <text x="58" y="74"
+          font-family="'SF Mono', 'JetBrains Mono', Menlo, Monaco, monospace"
+          font-size="20" fill="#fafafa">tail -f logs/app.json | jq</text>
+    <text x="32" y="112"
+          font-family="'SF Mono', 'JetBrains Mono', Menlo, Monaco, monospace"
+          font-size="18" fill="#22c55e">{ "level": "error", "operation": "billing.charge",</text>
+    <text x="56" y="138"
+          font-family="'SF Mono', 'JetBrains Mono', Menlo, Monaco, monospace"
+          font-size="18" fill="#22c55e">"error_code": "E_DEP_STRIPE_TIMEOUT", "duration_ms": 5023,</text>
+    <text x="56" y="164"
+          font-family="'SF Mono', 'JetBrains Mono', Menlo, Monaco, monospace"
+          font-size="18" fill="#22c55e">"correlation_id": "req_a8f2c1...", "retry": 3 }</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="80" y="615"
+        font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif"
+        font-size="20" font-weight="500" fill="#737373">github.com/Tramsnf/Receipts</text>
+  <text x="1200" y="615" text-anchor="end"
+        font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif"
+        font-size="20" font-weight="500" fill="#737373">@Tramsnf · MIT</text>
+</svg>
